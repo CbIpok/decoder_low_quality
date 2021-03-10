@@ -29,7 +29,7 @@ BlockOfMemory Parser::getHeader()
     return blockOfMemory;
 }
 
-void Parser::writeBlockOfMemoryToFile(BlockOfMemory blockOfMemory, std::string fileName)
+void Parser::writeBlockOfMemoryToFile(BlockOfMemory &blockOfMemory, std::string fileName)
 {
  
     try {
@@ -62,7 +62,14 @@ BlockOfMemory::BlockOfMemory(uint8_t* data, size_t len):
 
 }
 
+BlockOfMemory::BlockOfMemory(BlockOfMemory&& blockOfMemory):
+    data(blockOfMemory.data),
+    len(blockOfMemory.len)
+{
+    blockOfMemory.data = nullptr;
+}
+
 BlockOfMemory::~BlockOfMemory()
 {
-    delete data;
+   delete data;
 }

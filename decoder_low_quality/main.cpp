@@ -1,11 +1,13 @@
 #include "Parser.h"
 #include <cstdint>
-
+#include <iostream>
 
 int main()
 {
     //// code not for review
     FILE* fp;
+
+    std::cout << __cplusplus << std::endl;
 
     fp = fopen("1_b_3.jxs", "rb");  // r for read, b for binary
 

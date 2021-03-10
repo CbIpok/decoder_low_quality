@@ -8,6 +8,11 @@ class BlockOfMemory // struct with destructure
 {
 public:
     BlockOfMemory(uint8_t *data,size_t len);
+
+    BlockOfMemory(const BlockOfMemory&) = delete;
+
+    BlockOfMemory(BlockOfMemory&& blockOfMemory);
+
     ~BlockOfMemory();
 
     uint8_t* data;
@@ -33,7 +38,7 @@ public:
 
     BlockOfMemory gesEos();
 
-    void writeBlockOfMemoryToFile(BlockOfMemory blockOfMemory, std::string fileName); //make &&f
+    void writeBlockOfMemoryToFile(BlockOfMemory& blockOfMemory, std::string fileName); //make &&f
     
 private:
     const size_t SIZE_OF_HEADER = 96;
