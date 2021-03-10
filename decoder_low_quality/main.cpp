@@ -4,7 +4,7 @@
 
 int main()
 {
-    // code not for review
+    //// code not for review
     FILE* fp;
 
     fp = fopen("1_b_3.jxs", "rb");  // r for read, b for binary
@@ -21,7 +21,7 @@ int main()
 
     auto block = parser.getHeader();
 
-    parser.writeBlockOfMemoryToFile(block, "header.jxs");
+    //parser.writeBlockOfMemoryToFile(block, "header.jxs");
 
 
     return 0;

@@ -2,6 +2,7 @@
 #include "bitstream.h"
 #include <fstream>
 #include <memory>
+#include <iostream>
 
 Parser::Parser(Bitstream bitstream) :
     bitstream(bitstream)
@@ -30,17 +31,25 @@ Parser::BlockOfMemory Parser::getHeader()
 
 void Parser::writeBlockOfMemoryToFile(BlockOfMemory blockOfMemory, std::string fileName)
 {
+ 
+    try {
+        std::ofstream out(fileName, std::ios::binary);
+        out.write((char*)blockOfMemory.first, blockOfMemory.second);
+    }
+    catch (std::exception e)
+    {
+        std::cout << "cannot write to file";
+    }
 
-    //std::ofstream out(fileName, std::ios::binary);
-    ////out.write((char*)(blockOfMemory.first.get()), blockOfMemory.second); //c style cast
-    //out.write((char*)blockOfMemory.first, blockOfMemory.second);
+    //out.write((char*)(blockOfMemory.first.get()), blockOfMemory.second); //c style cast
+    
 
     //c code style, code bellow not working
 
-    FILE* write_ptr;
+    //FILE* write_ptr;
 
-    write_ptr = fopen(fileName.c_str(), "wb");  // w for write, b for binary
+    //write_ptr = fopen(fileName.c_str(), "wb");  // w for write, b for binary
 
-    fwrite(blockOfMemory.first, blockOfMemory.second, 1, write_ptr); // write 10 bytes from our buffer
+    //fwrite(blockOfMemory.first, blockOfMemory.second, 1, write_ptr); // write 10 bytes from our buffer
 
 }
