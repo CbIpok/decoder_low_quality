@@ -17,15 +17,15 @@ Parser::Parser(uint8_t* bitstream)
     this->bitstream.len = 0;
 }
 
-Parser::BlockOfMemory Parser::getHeader()
+BlockOfMemory Parser::getHeader()
 {
     uint8_t* buf = new uint8_t(SIZE_OF_HEADER);
 
     readFromBitsream(bitstream, buf, SIZE_OF_HEADER);
-    BlockOfMemory blockOfMemory;
+    BlockOfMemory blockOfMemory(buf, SIZE_OF_HEADER);
     //blockOfMemory.first = std::shared_ptr<uint8_t>(buf);
-    blockOfMemory.first = buf;
-    blockOfMemory.second = SIZE_OF_HEADER;
+    /*blockOfMemory.first = buf;
+    blockOfMemory.second = SIZE_OF_HEADER;*/
     return blockOfMemory;
 }
 
@@ -34,7 +34,8 @@ void Parser::writeBlockOfMemoryToFile(BlockOfMemory blockOfMemory, std::string f
  
     try {
         std::ofstream out(fileName, std::ios::binary);
-        out.write((char*)blockOfMemory.first, blockOfMemory.second);
+        //out.write((char*)blockOfMemory.first, blockOfMemory.second);
+        out.write((char*)blockOfMemory.data, blockOfMemory.len);
     }
     catch (std::exception e)
     {
@@ -52,4 +53,16 @@ void Parser::writeBlockOfMemoryToFile(BlockOfMemory blockOfMemory, std::string f
 
     //fwrite(blockOfMemory.first, blockOfMemory.second, 1, write_ptr); // write 10 bytes from our buffer
 
+}
+
+BlockOfMemory::BlockOfMemory(uint8_t* data, size_t len):
+    data(data),
+    len(len)
+{
+
+}
+
+BlockOfMemory::~BlockOfMemory()
+{
+    delete data;
 }

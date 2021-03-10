@@ -4,12 +4,23 @@
 #include "bitstream.h"
 
 
+class BlockOfMemory // struct with destructure
+{
+public:
+    BlockOfMemory(uint8_t *data,size_t len);
+    ~BlockOfMemory();
+
+    uint8_t* data;
+    size_t len;
+private:
+    
+};
+
 
 
 class Parser
 {
 public:
-    using BlockOfMemory = std::pair<uint8_t*, size_t>; //memory leak, make shared
     //using BlockOfMemory = std::pair<std::shared_ptr<uint8_t>, size_t>;
 
     Parser(Bitstream bitstream );
