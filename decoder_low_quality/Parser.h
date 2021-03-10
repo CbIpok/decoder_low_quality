@@ -11,7 +11,7 @@ public:
 
     BlockOfMemory(const BlockOfMemory&) = delete;
 
-    BlockOfMemory(BlockOfMemory&& blockOfMemory);
+    BlockOfMemory(BlockOfMemory&& blockOfMemory) noexcept;
 
     ~BlockOfMemory();
 

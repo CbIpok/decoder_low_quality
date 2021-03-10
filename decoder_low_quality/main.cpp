@@ -23,7 +23,7 @@ int main()
 
     auto block = parser.getHeader();
 
-    //parser.writeBlockOfMemoryToFile(block, "header.jxs");
+    parser.writeBlockOfMemoryToFile(block, "header.jxs");
 
 
     return 0;

@@ -29,9 +29,9 @@ BlockOfMemory Parser::getHeader()
     return blockOfMemory;
 }
 
-void Parser::writeBlockOfMemoryToFile(BlockOfMemory &blockOfMemory, std::string fileName)
+void Parser::writeBlockOfMemoryToFile(BlockOfMemory& blockOfMemory, std::string fileName)
 {
- 
+
     try {
         std::ofstream out(fileName, std::ios::binary);
         //out.write((char*)blockOfMemory.first, blockOfMemory.second);
@@ -43,7 +43,7 @@ void Parser::writeBlockOfMemoryToFile(BlockOfMemory &blockOfMemory, std::string 
     }
 
     //out.write((char*)(blockOfMemory.first.get()), blockOfMemory.second); //c style cast
-    
+
 
     //c code style, code bellow not working
 
@@ -55,14 +55,15 @@ void Parser::writeBlockOfMemoryToFile(BlockOfMemory &blockOfMemory, std::string 
 
 }
 
-BlockOfMemory::BlockOfMemory(uint8_t* data, size_t len):
+BlockOfMemory::BlockOfMemory(uint8_t* data, size_t len) :
     data(data),
     len(len)
 {
 
 }
 
-BlockOfMemory::BlockOfMemory(BlockOfMemory&& blockOfMemory):
+
+BlockOfMemory::BlockOfMemory(BlockOfMemory&& blockOfMemory) noexcept :
     data(blockOfMemory.data),
     len(blockOfMemory.len)
 {
@@ -71,5 +72,5 @@ BlockOfMemory::BlockOfMemory(BlockOfMemory&& blockOfMemory):
 
 BlockOfMemory::~BlockOfMemory()
 {
-   delete data;
+    delete data;
 }
