@@ -1,5 +1,6 @@
 #pragma once
-#include <memory>
+
+#include <string>
 #include <vector>
 #include "bitstream.h"
 
@@ -16,9 +17,7 @@ public:
     ~BlockOfMemory();
 
     uint8_t* data;
-    size_t len;
-private:
-    
+    size_t len;    
 };
 
 
@@ -26,9 +25,8 @@ private:
 class Parser
 {
 public:
-    //using BlockOfMemory = std::pair<std::shared_ptr<uint8_t>, size_t>;
 
-    Parser(Bitstream bitstream );
+    Parser(Bitstream&& bitstream);
 
     Parser(uint8_t *bitstream);
 
@@ -38,10 +36,10 @@ public:
 
     BlockOfMemory gesEos();
 
-    void writeBlockOfMemoryToFile(BlockOfMemory& blockOfMemory, std::string fileName); //make &&f
+    void writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName); //make &&f
     
 private:
-    const size_t SIZE_OF_HEADER = 96;
+    constexpr static size_t SIZE_OF_HEADER = 96;
 
     Bitstream bitstream;
 

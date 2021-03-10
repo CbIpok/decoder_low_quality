@@ -1,6 +1,6 @@
 #pragma once
+
 #include <cstdint>
-#include <string>
 
 struct Bitstream
 {
@@ -10,5 +10,5 @@ struct Bitstream
 };
 
 
-void readFromBitsream(Bitstream bitstream, uint8_t* src, size_t size);
+void readFromBitsream(Bitstream& bitstream, uint8_t* src, size_t size);
 

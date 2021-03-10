@@ -2,6 +2,6 @@
 #include <cstdint>
 class Decoder
 {
-    void Decode(const uint8_t* p, const size_t size);
+    void Decode(const uint8_t* p, size_t size);
 };
 

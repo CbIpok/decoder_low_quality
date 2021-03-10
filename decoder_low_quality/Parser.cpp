@@ -1,11 +1,13 @@
 #include "Parser.h"
+
+#include <cassert>
+
 #include "bitstream.h"
 #include <fstream>
-#include <memory>
 #include <iostream>
 
-Parser::Parser(Bitstream bitstream) :
-    bitstream(bitstream)
+Parser::Parser(Bitstream&& bitstream) :
+    bitstream(std::move(bitstream))
 {
 
 }
@@ -19,17 +21,13 @@ Parser::Parser(uint8_t* bitstream)
 
 BlockOfMemory Parser::getHeader()
 {
-    uint8_t* buf = new uint8_t(SIZE_OF_HEADER);
+    uint8_t* buf = new uint8_t[SIZE_OF_HEADER];
 
     readFromBitsream(bitstream, buf, SIZE_OF_HEADER);
-    BlockOfMemory blockOfMemory(buf, SIZE_OF_HEADER);
-    //blockOfMemory.first = std::shared_ptr<uint8_t>(buf);
-    /*blockOfMemory.first = buf;
-    blockOfMemory.second = SIZE_OF_HEADER;*/
-    return blockOfMemory;
+    return { buf, SIZE_OF_HEADER };
 }
 
-void Parser::writeBlockOfMemoryToFile(BlockOfMemory& blockOfMemory, std::string fileName)
+void Parser::writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName)
 {
 
     try {
@@ -37,7 +35,7 @@ void Parser::writeBlockOfMemoryToFile(BlockOfMemory& blockOfMemory, std::string 
         //out.write((char*)blockOfMemory.first, blockOfMemory.second);
         out.write((char*)blockOfMemory.data, blockOfMemory.len);
     }
-    catch (std::exception e)
+    catch (const std::exception& e)
     {
         std::cout << "cannot write to file";
     }
@@ -59,7 +57,7 @@ BlockOfMemory::BlockOfMemory(uint8_t* data, size_t len) :
     data(data),
     len(len)
 {
-
+    assert(data != nullptr);
 }
 
 
@@ -72,5 +70,5 @@ BlockOfMemory::BlockOfMemory(BlockOfMemory&& blockOfMemory) noexcept :
 
 BlockOfMemory::~BlockOfMemory()
 {
-    delete data;
+    delete[] data;
 }
