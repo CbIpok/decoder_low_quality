@@ -4,6 +4,8 @@
 //const (todo remove define)
 #define XS_MARKER_PIH 0xff12
 #define XS_MARKER_NBYTES 2
+#define XS_MARKER_SOC 0xff10
+#define XS_MARKER_CAP 0xff50
 
 struct PictureHeader
 {

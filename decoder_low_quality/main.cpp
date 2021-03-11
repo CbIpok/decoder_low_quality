@@ -23,9 +23,9 @@ int main()
 
     writeBlockOfMemoryToFile(block, "header.jxs");
 
-    Parser parsrer();
+    DetailParser dparser;
 
-    parser.parseHeader(block);
+    dparser.parseHeader(block);
 
     
 

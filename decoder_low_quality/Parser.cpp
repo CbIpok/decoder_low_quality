@@ -31,6 +31,19 @@ BlockOfMemory BlockParser::getHeader()
     return { buf, HEADER_SIZE };
 }
 
+BlockOfMemory BlockParser::getSlice()
+{
+	uint8_t* data{nullptr};
+	size_t size = 0;
+	return BlockOfMemory(data, size);
+}
+
+//BlockOfMemory BlockParser::getSlice()
+//{
+//	
+//	return BlockOfMemory();
+//}
+
 
 
 void writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName)
@@ -73,68 +86,116 @@ BlockOfMemory::~BlockOfMemory()
     delete[] data; //todo make smart pointer
 }
 
-PictureHeader Parser::parseHeader(BlockOfMemory& blockOfMemory)
+
+
+PictureHeader DetailParser::parseHeader(BlockOfMemory& blockOfMemory)
 {
-    PictureHeader pictureHeader;
-	int lpih = 26;
-	int precinct_height;
-	uint32_t val;
-	readFromBitsream(blockOfMemory.bitstream, (uint8_t*)(&val), XS_MARKER_NBYTES);
-	assert(val == XS_MARKER_PIH);
-	//nbits += bitunpacker_read(bitstream, &val, XS_MARKER_NBITS);
-	//assert(val == lpih);
-	//nbits += bitunpacker_read(bitstream, &val, 32);
-	//conf->bitstream_nbytes = val;
+	PictureHeader pictureHeader;
+	int lpih = 26; //todo rename
+	int precinctHeight; //todo rename
+	uint16_t marker;
+	uint32_t val32 = 0;
+	uint16_t val16 = 0;
+	uint8_t val8 = 0;
 
-	//nbits += bitunpacker_read(bitstream, &val, 16);
+	
+	//SOC marker 
+	{
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, marker, XS_MARKER_NBYTES);
+		assert(marker == XS_MARKER_SOC);
+	}
+	//CAP markers
+	{
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, marker, XS_MARKER_NBYTES);
+		assert(marker == XS_MARKER_CAP);
+		//Lcap
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, marker, XS_MARKER_NBYTES);
+		assert(marker == 2); 
+	}
+	//PIH markers and data
+	{
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, marker, XS_MARKER_NBYTES);
+		assert(marker == XS_MARKER_PIH);
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
+		assert(val16 == lpih);
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val32, sizeof(val32));
+		pictureHeader.codestreamSize = val32;
 
-	//nbits += bitunpacker_read(bitstream, &val, 16);
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
+		pictureHeader.profile = val16;
 
-	//nbits += bitunpacker_read(bitstream, &val, 16);
-	//im->w[0] = val;
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
+		pictureHeader.level = val16;
 
-	//nbits += bitunpacker_read(bitstream, &val, 16);
-	//im->h[0] = val;
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
+		pictureHeader.frameHeight = val16;
 
-
-	//nbits += bitunpacker_read(bitstream, &val, 16);
-	//conf->col_sz = val;
-
-	//nbits += bitunpacker_read(bitstream, &val, 16);
-	//conf->slice_height = val;
-	//nbits += bitunpacker_read(bitstream, &val, 8);
-	//im->ncomps = val;
-	//nbits += bitunpacker_read(bitstream, &val, 8);
-	//conf->group_size = val;
-	//nbits += bitunpacker_read(bitstream, &val, 8);
-	//conf->sigflags_group_width = val;
-	//nbits += bitunpacker_read(bitstream, &val, 8);
-	//conf->in_depth = val;
-	//nbits += bitunpacker_read(bitstream, &val, 4);
-	//conf->quant = val;
-	//nbits += bitunpacker_read(bitstream, &val, 4);
-	//assert(val == 4);
-	//nbits += bitunpacker_read(bitstream, &val, 1);
-	//assert(val == 0);
-	//nbits += bitunpacker_read(bitstream, &val, 3);
-	//assert(val == 0);
-	//nbits += bitunpacker_read(bitstream, &val, 4);
-	//conf->rct = val;
-	//nbits += bitunpacker_read(bitstream, &val, 4);
-	//conf->ndecomp_h = val;
-	//nbits += bitunpacker_read(bitstream, &val, 4);
-	//conf->ndecomp_v = val;
-	//precinct_height = (1 << conf->ndecomp_v);
-	//conf->slice_height *= precinct_height;
-	//nbits += bitunpacker_read(bitstream, &val, 4);
-	//conf->dq_type = val;
-	//nbits += bitunpacker_read(bitstream, &val, 2);
-	//conf->sign_opt = val;
-	//nbits += bitunpacker_read(bitstream, &val, 2);
-	//conf->gc_run_sigflags_zrcsf = val;
-	//conf->gc_run_sigflags_zrf = (!val);
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
+		pictureHeader.frameWidth = val16;
 
 
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
+		pictureHeader.precinctWidth = val16;
 
-    return PictureHeader();
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
+		pictureHeader.slicehHeight = val16;
+		 
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+		pictureHeader.componentsNumber = val8;
+		 
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+		pictureHeader.codeGroupSize = val8;
+		 
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+		pictureHeader.significanceGroupSize = val8;
+	
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+		pictureHeader.waveletBitPrecision = val8;
+		 
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+
+		pictureHeader.fractionalBits =  val8 >> 4; //read 4
+
+		pictureHeader.rawBitsPerCodeGroup = (val8 & 0b0001111); //read 4
+		assert(pictureHeader.rawBitsPerCodeGroup == 4);
+
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+
+		pictureHeader.sliceCodingMode = val8 >> 7; //read 1
+	
+		pictureHeader.progressionMode = (val8 >> 4) & 0b00000111; //read 3
+
+		pictureHeader.colourDecorrelation = val8 & 0b0001111; //read 4
+		
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+		pictureHeader.horizontalWaveletLevels = val8 >> 4; //read 4
+
+		pictureHeader.verticalWaveletLevels = val8 & 0b0001111; //read 4
+		precinctHeight = (1 << pictureHeader.verticalWaveletLevels);
+		pictureHeader.slicehHeight *= precinctHeight;
+
+		readFromBitsreamAndSwap(blockOfMemory.bitstream, val8, sizeof(val8));
+
+		pictureHeader.quantizerType = val8 >> 4;//read 4
+
+		pictureHeader.signHandling = (val8 >> 2) & (0b00000011); //read 2
+
+		pictureHeader.runMode = val8 & 0b000000011; //read 2
+
+
+
+	}
+	//parse CDT
+	{
+		
+	}
+	//parse WGT
+	{
+
+	}
+	
+
+
+	
+	return pictureHeader;
 }
