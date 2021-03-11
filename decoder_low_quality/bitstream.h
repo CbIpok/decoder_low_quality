@@ -4,11 +4,12 @@
 
 struct Bitstream
 {
-    size_t len;
+    size_t size;
+    size_t len_readed;
     uint8_t *cur;
-    uint8_t *buf;
+    uint8_t *buf; 
 };
 
 
-void readFromBitsream(Bitstream& bitstream, uint8_t* src, size_t size);
+void readFromBitsream(Bitstream& bitstream, uint8_t* dst, size_t size);
 

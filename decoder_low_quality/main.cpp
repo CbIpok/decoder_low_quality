@@ -17,11 +17,17 @@ int main()
 
     fread(p, len, 1, fp);
 
-    BlockParser parser(p);
+    BlockParser parser(p,len);
 
     auto block = parser.getHeader();
 
-    parser.writeBlockOfMemoryToFile(block, "header.jxs");
+    writeBlockOfMemoryToFile(block, "header.jxs");
+
+    Parser parsrer();
+
+    parser.parseHeader(block);
+
+    
 
 
     return 0;

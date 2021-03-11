@@ -5,6 +5,7 @@
 #include "bitstream.h"
 #include <fstream>
 #include <iostream>
+#include "bitstream.h"
 
 BlockParser::BlockParser(Bitstream&& bitstream) :
     bitstream(std::move(bitstream))
@@ -12,12 +13,15 @@ BlockParser::BlockParser(Bitstream&& bitstream) :
 
 }
 
-BlockParser::BlockParser(uint8_t* bitstream)
+BlockParser::BlockParser(uint8_t* bitstream, size_t size)
 {
     this->bitstream.buf = bitstream;
     this->bitstream.cur = bitstream;
-    this->bitstream.len = 0;
+    this->bitstream.len_readed = 0;
+    this->bitstream.size = size;
+
 }
+
 
 BlockOfMemory BlockParser::getHeader()
 {
@@ -27,10 +31,13 @@ BlockOfMemory BlockParser::getHeader()
     return { buf, HEADER_SIZE };
 }
 
-void BlockParser::writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName)
+
+
+void writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName)
 {
 
-    try {
+    try 
+    {
         std::ofstream out(fileName, std::ios::binary);
         //out.write((char*)blockOfMemory.first, blockOfMemory.second);
         out.write((char*)blockOfMemory.data, blockOfMemory.len);
@@ -39,25 +46,18 @@ void BlockParser::writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, c
     {
         std::cout << "cannot write to file";
     }
-
-    //out.write((char*)(blockOfMemory.first.get()), blockOfMemory.second); //c style cast
-
-
-    //c code style, code bellow not working
-
-    //FILE* write_ptr;
-
-    //write_ptr = fopen(fileName.c_str(), "wb");  // w for write, b for binary
-
-    //fwrite(blockOfMemory.first, blockOfMemory.second, 1, write_ptr); // write 10 bytes from our buffer
-
 }
 
-BlockOfMemory::BlockOfMemory(uint8_t* data, size_t len) :
+
+BlockOfMemory::BlockOfMemory(uint8_t* data, size_t size) :
     data(data),
-    len(len)
+    len(size)
 {
     assert(data != nullptr);
+    bitstream.buf = data;
+    bitstream.cur = data;
+    bitstream.len_readed = 0;
+    bitstream.size = size;
 }
 
 
@@ -70,5 +70,71 @@ BlockOfMemory::BlockOfMemory(BlockOfMemory&& blockOfMemory) noexcept :
 
 BlockOfMemory::~BlockOfMemory()
 {
-    delete[] data;
+    delete[] data; //todo make smart pointer
+}
+
+PictureHeader Parser::parseHeader(BlockOfMemory& blockOfMemory)
+{
+    PictureHeader pictureHeader;
+	int lpih = 26;
+	int precinct_height;
+	uint32_t val;
+	readFromBitsream(blockOfMemory.bitstream, (uint8_t*)(&val), XS_MARKER_NBYTES);
+	assert(val == XS_MARKER_PIH);
+	//nbits += bitunpacker_read(bitstream, &val, XS_MARKER_NBITS);
+	//assert(val == lpih);
+	//nbits += bitunpacker_read(bitstream, &val, 32);
+	//conf->bitstream_nbytes = val;
+
+	//nbits += bitunpacker_read(bitstream, &val, 16);
+
+	//nbits += bitunpacker_read(bitstream, &val, 16);
+
+	//nbits += bitunpacker_read(bitstream, &val, 16);
+	//im->w[0] = val;
+
+	//nbits += bitunpacker_read(bitstream, &val, 16);
+	//im->h[0] = val;
+
+
+	//nbits += bitunpacker_read(bitstream, &val, 16);
+	//conf->col_sz = val;
+
+	//nbits += bitunpacker_read(bitstream, &val, 16);
+	//conf->slice_height = val;
+	//nbits += bitunpacker_read(bitstream, &val, 8);
+	//im->ncomps = val;
+	//nbits += bitunpacker_read(bitstream, &val, 8);
+	//conf->group_size = val;
+	//nbits += bitunpacker_read(bitstream, &val, 8);
+	//conf->sigflags_group_width = val;
+	//nbits += bitunpacker_read(bitstream, &val, 8);
+	//conf->in_depth = val;
+	//nbits += bitunpacker_read(bitstream, &val, 4);
+	//conf->quant = val;
+	//nbits += bitunpacker_read(bitstream, &val, 4);
+	//assert(val == 4);
+	//nbits += bitunpacker_read(bitstream, &val, 1);
+	//assert(val == 0);
+	//nbits += bitunpacker_read(bitstream, &val, 3);
+	//assert(val == 0);
+	//nbits += bitunpacker_read(bitstream, &val, 4);
+	//conf->rct = val;
+	//nbits += bitunpacker_read(bitstream, &val, 4);
+	//conf->ndecomp_h = val;
+	//nbits += bitunpacker_read(bitstream, &val, 4);
+	//conf->ndecomp_v = val;
+	//precinct_height = (1 << conf->ndecomp_v);
+	//conf->slice_height *= precinct_height;
+	//nbits += bitunpacker_read(bitstream, &val, 4);
+	//conf->dq_type = val;
+	//nbits += bitunpacker_read(bitstream, &val, 2);
+	//conf->sign_opt = val;
+	//nbits += bitunpacker_read(bitstream, &val, 2);
+	//conf->gc_run_sigflags_zrcsf = val;
+	//conf->gc_run_sigflags_zrf = (!val);
+
+
+
+    return PictureHeader();
 }
