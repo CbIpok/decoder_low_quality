@@ -6,28 +6,28 @@
 #include <fstream>
 #include <iostream>
 
-Parser::Parser(Bitstream&& bitstream) :
+BlockParser::BlockParser(Bitstream&& bitstream) :
     bitstream(std::move(bitstream))
 {
 
 }
 
-Parser::Parser(uint8_t* bitstream)
+BlockParser::BlockParser(uint8_t* bitstream)
 {
     this->bitstream.buf = bitstream;
     this->bitstream.cur = bitstream;
     this->bitstream.len = 0;
 }
 
-BlockOfMemory Parser::getHeader()
+BlockOfMemory BlockParser::getHeader()
 {
-    uint8_t* buf = new uint8_t[SIZE_OF_HEADER];
+    uint8_t* buf = new uint8_t[HEADER_SIZE];
 
-    readFromBitsream(bitstream, buf, SIZE_OF_HEADER);
-    return { buf, SIZE_OF_HEADER };
+    readFromBitsream(bitstream, buf, HEADER_SIZE);
+    return { buf, HEADER_SIZE };
 }
 
-void Parser::writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName)
+void BlockParser::writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName)
 {
 
     try {

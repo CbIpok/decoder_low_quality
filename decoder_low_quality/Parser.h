@@ -22,24 +22,26 @@ public:
 
 
 
-class Parser
+class BlockParser
 {
 public:
 
-    Parser(Bitstream&& bitstream);
+    BlockParser(Bitstream&& bitstream);
 
-    Parser(uint8_t *bitstream);
+    BlockParser(uint8_t *bitstream);
 
     BlockOfMemory getHeader();
     
     std::vector<BlockOfMemory> getSlises();
+
+    BlockOfMemory getSlice();
 
     BlockOfMemory gesEos();
 
     void writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::string& fileName); //make &&f
     
 private:
-    constexpr static size_t SIZE_OF_HEADER = 96;
+    constexpr static size_t HEADER_SIZE = 96;
 
     Bitstream bitstream;
 
@@ -51,8 +53,9 @@ private:
         DONE
     };
 
-   
+    
 
    
 };
+
 
