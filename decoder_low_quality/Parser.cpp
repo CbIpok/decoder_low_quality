@@ -5,6 +5,7 @@
 #include "bitstream.h"
 #include <fstream>
 #include <iostream>
+#include <cmath>
 #include "bitstream.h"
 
 BlockParser::BlockParser(Bitstream&& bitstream) :
@@ -31,11 +32,57 @@ BlockOfMemory BlockParser::getHeader()
     return { buf, HEADER_SIZE };
 }
 
+std::vector<BlockOfMemory> BlockParser::getSlices()
+{
+	std::vector<BlockOfMemory> slices;
+	uint16_t marker = 0;
+	while (marker != XS_MARKER_EOC)
+	{
+		slices.push_back(getSlice());
+		peekBitsreamAndSwap(bitstream, marker, XS_MARKER_NBYTES);
+	}
+	return slices;
+}
+
+
 BlockOfMemory BlockParser::getSlice()
 {
 	uint8_t* data{nullptr};
-	size_t size = 0;
-	return BlockOfMemory(data, size);
+	Bitstream localBistream = bitstream;
+	size_t sliceSize = getSliceSize(localBistream);
+	data = new uint8_t[sliceSize];
+	readFromBitsream(bitstream, data, sliceSize);
+	return BlockOfMemory(data, sliceSize);
+}
+
+
+
+
+size_t BlockParser::getSliceSize(Bitstream lbitsream)
+{
+	size_t size;
+	uint16_t marker;
+	uint16_t val16;
+	uint32_t val32;
+	readFromBitsreamAndSwap(lbitsream, marker, XS_MARKER_NBYTES);
+	assert(marker == XS_MARKER_SLH);
+	readFromBitsreamAndSwap(lbitsream, val16, sizeof(val16));
+	assert(val16 == 4); // todo Lslh constant
+	readFromBitsreamAndSwap(lbitsream, val16, sizeof(val16)); // slice number read
+	
+	//read all precincts in slice
+	while (val16 != XS_MARKER_SLH && val16 != XS_MARKER_EOC)
+	{
+		peekBitsreamAndSwap(lbitsream, val32, sizeof(val32));
+		uint32_t precinctDataSize = val32 >> 8; // read 24 bits
+		size_t precinctOverhead = 11;
+		size_t precincSize = precinctDataSize + precinctOverhead;
+		bistreamSkip(lbitsream, precincSize);
+		peekBitsreamAndSwap(lbitsream, val16, sizeof(val16)); // possible read Slice header
+	}
+	
+	size = lbitsream.len_readed - bitstream.len_readed;
+	return size;
 }
 
 //BlockOfMemory BlockParser::getSlice()
@@ -53,7 +100,7 @@ void writeBlockOfMemoryToFile(const BlockOfMemory& blockOfMemory, const std::str
     {
         std::ofstream out(fileName, std::ios::binary);
         //out.write((char*)blockOfMemory.first, blockOfMemory.second);
-        out.write((char*)blockOfMemory.data, blockOfMemory.len);
+        out.write((char*)blockOfMemory.data.get(), blockOfMemory.len);
     }
     catch (const std::exception& e)
     {
@@ -83,7 +130,7 @@ BlockOfMemory::BlockOfMemory(BlockOfMemory&& blockOfMemory) noexcept :
 
 BlockOfMemory::~BlockOfMemory()
 {
-    delete[] data; //todo make smart pointer
+     
 }
 
 
@@ -91,8 +138,8 @@ BlockOfMemory::~BlockOfMemory()
 PictureHeader DetailParser::parseHeader(BlockOfMemory& blockOfMemory)
 {
 	PictureHeader pictureHeader;
-	int lpih = 26; //todo rename
-	int precinctHeight; //todo rename
+	int LenghtPih = 26; 
+	int precinctHeight; 
 	uint16_t marker;
 	uint32_t val32 = 0;
 	uint16_t val16 = 0;
@@ -117,7 +164,7 @@ PictureHeader DetailParser::parseHeader(BlockOfMemory& blockOfMemory)
 		readFromBitsreamAndSwap(blockOfMemory.bitstream, marker, XS_MARKER_NBYTES);
 		assert(marker == XS_MARKER_PIH);
 		readFromBitsreamAndSwap(blockOfMemory.bitstream, val16, sizeof(val16));
-		assert(val16 == lpih);
+		assert(val16 == LenghtPih);
 		readFromBitsreamAndSwap(blockOfMemory.bitstream, val32, sizeof(val32));
 		pictureHeader.codestreamSize = val32;
 
@@ -181,8 +228,6 @@ PictureHeader DetailParser::parseHeader(BlockOfMemory& blockOfMemory)
 		pictureHeader.signHandling = (val8 >> 2) & (0b00000011); //read 2
 
 		pictureHeader.runMode = val8 & 0b000000011; //read 2
-
-
 
 	}
 	//parse CDT

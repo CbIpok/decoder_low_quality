@@ -20,7 +20,7 @@ public:
 
     ~BlockOfMemory();
 
-    uint8_t* data;
+    std::shared_ptr<uint8_t> data;
     size_t len;
     Bitstream bitstream;
 };
@@ -37,7 +37,7 @@ public:
 
     BlockOfMemory getHeader(); //todo SLICE HEADER LEN IS NOT CONSTANT!!
     
-    std::vector<BlockOfMemory> getSlises();
+    std::vector<BlockOfMemory> getSlices();
 
     BlockOfMemory getSlice();
 
@@ -60,6 +60,7 @@ private:
         DONE
     };
 
+    size_t getSliceSize(Bitstream bistream);
     
 
    
